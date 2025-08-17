@@ -12,7 +12,7 @@ from parrot.exceptions import ParrotEngineInternalError
 from .llm_engine import LLMEngine
 from .config import EngineConfig
 
-from .builtin.builtin_engine import BuiltinEngine
+# from .builtin.builtin_engine import BuiltinEngine
 from .openai.openai_engine import OpenAIEngine
 
 
@@ -50,9 +50,9 @@ def create_engine(
 
     engine_type = engine_config["engine_type"]
 
-    if engine_type == ENGINE_TYPE_BUILTIN:
-        return BuiltinEngine(engine_config, connect_to_core)
-    elif engine_type == ENGINE_TYPE_OPENAI:
+    # if engine_type == ENGINE_TYPE_BUILTIN:
+    #     return BuiltinEngine(engine_config, connect_to_core)
+    if engine_type == ENGINE_TYPE_OPENAI:
         return OpenAIEngine(engine_config, connect_to_core)
     else:
         raise ParrotEngineInternalError(f"Unsupported engine type: {engine_type}")
