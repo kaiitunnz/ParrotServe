@@ -108,9 +108,9 @@ class SemanticVariable:
     def set(self, content: str) -> None:
         """Set the content of variable."""
 
-        assert (self.is_registered, "The variable must be registered before setting.")
+        assert self.is_registered, "The variable must be registered before setting."
 
-        assert (not self.is_ready, "The variable can't be set repeatedly.")
+        assert not self.is_ready, "The variable can't be set repeatedly."
 
         self._set_semantic_variable(content)
         self.content = content
@@ -121,7 +121,7 @@ class SemanticVariable:
     ) -> str:
         """(Blocking) Get the content of the variable."""
 
-        assert (self.is_registered, "The variable must be registered before getting.")
+        assert self.is_registered, "The variable must be registered before getting."
 
         if self.is_ready:
             return self.content
@@ -129,10 +129,12 @@ class SemanticVariable:
         self.content = self._get_semantic_variable(criteria)
         return self.content
 
-    async def aget(self, criteria: PerformanceCriteria) -> str:
+    async def aget(
+        self, criteria: PerformanceCriteria = PerformanceCriteria.THROUGHPUT
+    ) -> str:
         """(Asynchronous) Get the content of the variable."""
 
-        assert (self.is_registered, "The variable must be registered before getting.")
+        assert self.is_registered, "The variable must be registered before getting."
 
         if self.is_ready:
             return self.content

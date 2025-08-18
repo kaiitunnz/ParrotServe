@@ -31,7 +31,7 @@ def _flush_handlers():
     global loggers
 
     for logger in loggers:
-        if logger.hasHandlers():
+        if logger.hasHandlers() and logger.handlers:
             log_level = logger.handlers[0].level
             logger.removeHandler(logger.handlers[0])
             _set_log_handler(logger, log_level)

@@ -103,7 +103,7 @@ class OpenAIEngine(LLMEngine):
                     # seed=self.engine_config.random_seed, # It is beta
                     **job.sampling_config.get_openai_params(),
                 )
-                generated_result = completion.choices[0].message.content
+                generated_result = completion.choices[0].text
             else:
                 chat_messages = job.context.get_whole_chat_messages()
                 logger.debug(f"Send messages: {chat_messages} to OpenAI API.")
