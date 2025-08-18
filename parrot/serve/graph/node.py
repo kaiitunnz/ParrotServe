@@ -373,8 +373,10 @@ class NativeFuncNode(BaseNode):
     async def wait_activated(self) -> None:
         """Wait until the node is activated."""
 
-        coros = [sv.wait_activated() for sv in self.output_vars.values()]
-        await asyncio.wait(coros, return_when=asyncio.FIRST_COMPLETED)
+        tasks = [
+            asyncio.create_task(sv.wait_activated()) for sv in self.output_vars.values()
+        ]
+        await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
 
 
 # Types
