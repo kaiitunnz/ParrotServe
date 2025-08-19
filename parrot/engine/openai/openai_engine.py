@@ -3,6 +3,7 @@
 
 
 from typing import Dict, AsyncGenerator
+import backoff
 import openai
 import time
 import asyncio
@@ -97,23 +98,19 @@ class OpenAIEngine(LLMEngine):
             if self.openai_config.api_endpoint == Endpoint.COMPLETION:
                 prompt = job.context.get_whole_context_text()
                 logger.debug(f"Send messages: {prompt} to OpenAI API.")
-                completion = await self.client.completions.create(
+                generated_result = await self._completion(
                     prompt=prompt,
                     model=self.engine_config.model,
-                    # seed=self.engine_config.random_seed, # It is beta
                     **job.sampling_config.get_openai_params(),
                 )
-                generated_result = completion.choices[0].text
             else:
                 chat_messages = job.context.get_whole_chat_messages()
                 logger.debug(f"Send messages: {chat_messages} to OpenAI API.")
-                chat_completion = await self.client.chat.completions.create(
+                generated_result = await self._chat_completion(
                     messages=chat_messages,
                     model=self.engine_config.model,
-                    # seed=self.engine_config.random_seed,
                     **job.sampling_config.get_openai_params(),
                 )
-                generated_result = chat_completion.choices[0].message.content
 
             ed = time_counter_in_nanoseconds()
             logger.debug(
@@ -125,6 +122,32 @@ class OpenAIEngine(LLMEngine):
             raise NotImplementedError
 
         job.finish_event.set()
+
+    @backoff.on_exception(
+        backoff.expo,
+        exception=[openai.RateLimitError, openai.APITimeoutError],
+        max_tries=10,
+        max_time=600,
+    )
+    async def _completion(self, prompt: str, model: str, **kwargs) -> str:
+        completion = await self.client.completions.create(
+            prompt=prompt, model=model, **kwargs
+        )
+        return completion.choices[0].text
+
+    @backoff.on_exception(
+        backoff.expo,
+        exception=[openai.RateLimitError, openai.APITimeoutError],
+        max_tries=10,
+        max_time=600,
+    )
+    async def _chat_completion(
+        self, messages: list[dict[str, str]], model: str, **kwargs
+    ) -> str:
+        chat_completion = await self.client.chat.completions.create(
+            messages=messages, model=model, **kwargs
+        )
+        return chat_completion.choices[0].message.content
 
     # ---------- Public APIs ----------
 
