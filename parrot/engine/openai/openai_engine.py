@@ -124,10 +124,7 @@ class OpenAIEngine(LLMEngine):
         job.finish_event.set()
 
     @backoff.on_exception(
-        backoff.expo,
-        exception=[openai.RateLimitError, openai.APITimeoutError],
-        max_tries=10,
-        max_time=600,
+        backoff.constant, exception=openai.APITimeoutError, jitter=None, interval=0
     )
     async def _completion(self, prompt: str, model: str, **kwargs) -> str:
         completion = await self.client.completions.create(
@@ -136,10 +133,7 @@ class OpenAIEngine(LLMEngine):
         return completion.choices[0].text
 
     @backoff.on_exception(
-        backoff.expo,
-        exception=[openai.RateLimitError, openai.APITimeoutError],
-        max_tries=10,
-        max_time=600,
+        backoff.constant, exception=openai.APITimeoutError, jitter=None, interval=0
     )
     async def _chat_completion(
         self, messages: list[dict[str, str]], model: str, **kwargs
