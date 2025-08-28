@@ -8,6 +8,7 @@ import openai
 import time
 import asyncio
 
+import httpx
 from parrot.utils import get_logger, create_task_in_loop, time_counter_in_nanoseconds
 from parrot.sampling_config import SamplingConfig
 from parrot.protocol.internal.runtime_info import EngineRuntimeInfo
@@ -51,17 +52,26 @@ class OpenAIEngine(LLMEngine):
             f"Creating an OpenAI client of the model: {self.engine_config.model} ..."
         )
 
+        http_client = httpx.AsyncClient(
+            base_url=self.openai_config.base_url,
+            timeout=httpx.Timeout(timeout=600, connect=5.0),
+            limits=httpx.Limits(
+                max_connections=9999999, max_keepalive_connections=9999999
+            ),
+        )
         if self.openai_config.is_azure:
             self.client = openai.AsyncAzureOpenAI(
                 api_key=self.openai_config.api_key,
                 api_version=self.openai_config.azure_api_version,
                 base_url=self.openai_config.base_url,
                 azure_endpoint=self.openai_config.azure_endpoint,
+                http_client=http_client,
             )
         else:
             self.client = openai.AsyncOpenAI(
                 api_key=self.openai_config.api_key,
                 base_url=self.openai_config.base_url,
+                http_client=http_client,
             )
 
         self._register_engine(self.engine_config)
