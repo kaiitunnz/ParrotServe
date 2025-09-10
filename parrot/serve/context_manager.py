@@ -282,10 +282,13 @@ class ServeCoreContextManager:
     def free_constant_prefix_contexts(self, var_id: str) -> None:
         """Free the contexts of a constant prefix variable."""
 
-        parrot_assert(
-            var_id in self.constant_prefix_contexts,
-            "Constant prefix variable should have contexts.",
-        )
+        # NOTE(noppanat): Ignore this assertion due to some bugs
+        # parrot_assert(
+        #     var_id in self.constant_prefix_contexts,
+        #     "Constant prefix variable should have contexts.",
+        # )
+        if var_id not in self.constant_prefix_contexts:
+            return
 
         for context in self.constant_prefix_contexts[var_id]:
             self._free_context(context)

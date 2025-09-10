@@ -54,7 +54,7 @@ class OpenAIEngine(LLMEngine):
 
         http_client = httpx.AsyncClient(
             base_url=self.openai_config.base_url,
-            timeout=httpx.Timeout(timeout=600, connect=5.0),
+            timeout=httpx.Timeout(timeout=6000, connect=60),
             limits=httpx.Limits(
                 max_connections=9999999, max_keepalive_connections=9999999
             ),
