@@ -2,7 +2,7 @@
 # Licensed under the MIT license.
 
 
-from typing import Type, Optional, Literal
+from typing import Type, Optional, Literal, Union
 import requests
 import aiohttp
 
@@ -12,6 +12,7 @@ from .base_response import BaseResponse, make_response, async_make_response
 
 
 logger = get_logger("API")
+DEFAULT_TIMEOUT = aiohttp.ClientTimeout(total=6000, connect=60)
 
 
 def send_http_request(
@@ -65,16 +66,17 @@ async def async_send_http_request(
     **kwargs,
 ) -> BaseResponse:
     url = http_addr + api_url
+    to = DEFAULT_TIMEOUT if timeout is None else timeout
     if method == "GET":
-        async with client_session.get(url, json=kwargs, timeout=timeout) as resp:
+        async with client_session.get(url, json=kwargs, timeout=to) as resp:
             assert resp.ok, f"Send http request error: {resp.reason}"
             return await async_make_response(response_cls, resp)
     elif method == "POST":
-        async with client_session.post(url, json=kwargs, timeout=timeout) as resp:
+        async with client_session.post(url, json=kwargs, timeout=to) as resp:
             assert resp.ok, f"Send http request error: {resp.reason}"
             return await async_make_response(response_cls, resp)
     elif method == "DELETE":
-        async with client_session.delete(url, json=kwargs, timeout=timeout) as resp:
+        async with client_session.delete(url, json=kwargs, timeout=to) as resp:
             assert resp.ok, f"Send http request error: {resp.reason}"
             return await async_make_response(response_cls, resp)
     else:
