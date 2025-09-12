@@ -148,7 +148,7 @@ class GlobalScheduler:
                     best_engine = engine
                 elif (
                     engine.get_remain_tokens_capacity()
-                    < best_engine.get_remain_tokens_capacity()
+                    > best_engine.get_remain_tokens_capacity()
                 ):
                     best_engine = engine
 

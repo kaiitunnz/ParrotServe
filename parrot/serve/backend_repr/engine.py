@@ -54,6 +54,7 @@ class ExecutionEngine:
         self.engine_id = engine_id
         self.config = config
         self.model = model
+        self._tokenizer_name = self.model.tokenizer_name
 
         # ---------- Status ----------
         self.status: EngineStatus = EngineStatus.RUNNING
@@ -170,10 +171,9 @@ class ExecutionEngine:
             tasks_num_upperbound
         )
 
-        if self.model_type == ModelType.TOKEN_ID:
-            tokens_num = task.get_token_nums(self.tokenizer_name)
-            self._serve_layer_runtime_info.tokens_num += tokens_num
-            debug_str = f" (Add {tokens_num} tokens, Total {self._serve_layer_runtime_info.tokens_num} tokens)"
+        tokens_num = task.get_token_nums(self._tokenizer_name)
+        self._serve_layer_runtime_info.tokens_num += tokens_num
+        debug_str = f" (Add {tokens_num} tokens, Total {self._serve_layer_runtime_info.tokens_num} tokens)"
 
         # logger.debug(
         #     f"Task(task_id={task.task_id}) is scheduled to Engine(engine_id={self.engine_id})."
@@ -192,10 +192,9 @@ class ExecutionEngine:
         self._serve_layer_runtime_info.num_tasks -= 1
         self._serve_layer_runtime_info.tasks_num_upperbounds.pop(task.task_id)
 
-        if self.model_type == ModelType.TOKEN_ID:
-            tokens_num = task.get_token_nums(self.tokenizer_name)
-            self._serve_layer_runtime_info.tokens_num -= tokens_num
-            debug_str = f" (Lose {tokens_num} tokens, Remaining {self._serve_layer_runtime_info.tokens_num} tokens)"
+        tokens_num = task.get_token_nums(self._tokenizer_name)
+        self._serve_layer_runtime_info.tokens_num -= tokens_num
+        debug_str = f" (Lose {tokens_num} tokens, Remaining {self._serve_layer_runtime_info.tokens_num} tokens)"
 
         # logger.debug(
         #     f"Task(task_id={task.task_id}) is removed from Engine(engine_id={self.engine_id})."
