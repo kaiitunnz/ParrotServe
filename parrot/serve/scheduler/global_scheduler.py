@@ -82,14 +82,13 @@ class GlobalScheduler:
             if len(tasks) > engine.get_remain_tasks_capacity():
                 return False
 
-            if model_type == ModelType.TOKEN_ID:
-                total_tokens_num = 0
-                for task in tasks:
-                    total_tokens_num += task.get_token_nums(engine.model.tokenizer_name)
+            total_tokens_num = 0
+            for task in tasks:
+                total_tokens_num += task.get_token_nums(engine.model.tokenizer_name)
 
-                # Check whether the engine has enough token capacity.
-                if total_tokens_num > engine.get_remain_tokens_capacity():
-                    return False
+            # Check whether the engine has enough token capacity.
+            if total_tokens_num > engine.get_remain_tokens_capacity():
+                return False
 
             return True
 
